@@ -6,7 +6,7 @@ namespace ConsoleApplication1
 {
     public class Program
     {
-        private static List<Tuple<string, string>> _enemyList;
+        private static List<Tuple<string, string>> _conditionList;
 
         public static void Main()
         {
@@ -34,21 +34,27 @@ namespace ConsoleApplication1
 
         }
 
-        public static Tuple<List<string>, List<string>, List<Tuple<string, string>>> JoinFriends(List<string> team1, List<string> team2, List<Tuple<string, string>> enemyList)
+        public static Tuple<List<string>, List<string>, List<Tuple<string, string>>> ComposeTeamsSimple(List<string> team1, List<string> team2, List<Tuple<string, string>> enemyList, List<Tuple<string, string>> friendList)
         {
-            _enemyList = enemyList;
+            List<Tuple<List<string>, List<string>>> resultList = new List<Tuple<List<string>, List<string>>>();
+
+        }
+
+        public static Tuple<List<string>, List<string>, List<Tuple<string, string>>> JoinFriends(List<string> team1, List<string> team2, List<Tuple<string, string>> friendList)
+        {
+            _conditionList = friendList.OrderBy(g => Guid.NewGuid()).ToList();
             var rulesDropped = new List<Tuple<string, string>>();
-            // check for enemies
-            for (int i = 0; i < _enemyList.Count; i++)
+            // check for friends
+            for (var i = 0; i < _conditionList.Count; i++)
             {
-                var ex = _enemyList[i];
-                if (team1.Contains(ex.Item1) && team1.Contains(ex.Item2))
+                var ex = _conditionList[i];
+                if (!(team1.Contains(ex.Item1) && team1.Contains(ex.Item2)))
                 {
-                    var res = FindPermutation(ex, team1, team2);
+                    var res = FindPermutation(ex, team1, team2, false);
                     if (team1 == res.Item1 && team2 == res.Item2 || team2 == res.Item1 && team1 == res.Item2)
                     {
-                        rulesDropped.Add(_enemyList[i]);
-                        _enemyList.Remove(ex);
+                        rulesDropped.Add(_conditionList[i]);
+                        _conditionList.Remove(ex);
                         i--;
                     }
                     else
@@ -57,13 +63,17 @@ namespace ConsoleApplication1
                         team2 = res.Item2;
                     }
                 }
-                if (team2.Contains(ex.Item1) && team2.Contains(ex.Item2))
+                else
                 {
-                    var res = FindPermutation(ex, team2, team1);
+                    continue;
+                }
+                if (!(team2.Contains(ex.Item1) && team2.Contains(ex.Item2)))
+                {
+                    var res = FindPermutation(ex, team2, team1, false);
                     if (team1 == res.Item1 && team2 == res.Item2 || team2 == res.Item1 && team1 == res.Item2)
                     {
-                        rulesDropped.Add(_enemyList[i]);
-                        _enemyList.Remove(ex);
+                        rulesDropped.Add(_conditionList[i]);
+                        _conditionList.Remove(ex);
                         i--;
                     }
                     else
@@ -78,20 +88,20 @@ namespace ConsoleApplication1
 
         public static Tuple<List<string>, List<string>, List<Tuple<string, string>>> SeparateEnemies(List<string> team1, List<string> team2, List<Tuple<string, string>> enemyList)
         {
-            _enemyList = enemyList;
+            _conditionList = enemyList.OrderBy(g => Guid.NewGuid()).ToList();
             var rulesDropped = new List<Tuple<string, string>>();
             // check for enemies
-            if (!AreThereEnemiesInTeam(team1) && !AreThereEnemiesInTeam(team2)) goto end;
-            for (int i = 0; i < _enemyList.Count; i++)
+            if (!AreConditionsGoodInTeam(team1) && !AreConditionsGoodInTeam(team2)) goto end;
+            for (var i = 0; i < _conditionList.Count; i++)
             {
-                var ex = _enemyList[i];
+                var ex = _conditionList[i];
                 if (team1.Contains(ex.Item1) && team1.Contains(ex.Item2))
                 {
-                    var res = FindPermutation(ex, team1, team2);
+                    var res = FindPermutation(ex, team1, team2, true);
                     if (team1 == res.Item1 && team2 == res.Item2 || team2 == res.Item1 && team1 == res.Item2)
                     {
-                        rulesDropped.Add(_enemyList[i]);
-                        _enemyList.Remove(ex);
+                        rulesDropped.Add(_conditionList[i]);
+                        _conditionList.Remove(ex);
                         i--;
                     }
                     else
@@ -102,11 +112,11 @@ namespace ConsoleApplication1
                 }
                 if (team2.Contains(ex.Item1) && team2.Contains(ex.Item2))
                 {
-                    var res = FindPermutation(ex, team2, team1);
+                    var res = FindPermutation(ex, team2, team1, true);
                     if (team1 == res.Item1 && team2 == res.Item2 || team2 == res.Item1 && team1 == res.Item2)
                     {
-                        rulesDropped.Add(_enemyList[i]);
-                        _enemyList.Remove(ex);
+                        rulesDropped.Add(_conditionList[i]);
+                        _conditionList.Remove(ex);
                         i--;
                     }
                     else
@@ -121,41 +131,44 @@ namespace ConsoleApplication1
             return new Tuple<List<string>, List<string>, List<Tuple<string, string>>>(team1, team2, rulesDropped);
         }
 
-        private static Tuple<List<string>, List<string>> FindPermutation(Tuple<string, string> tuple, List<string> teamWithEnemies, List<string> secondTeam)
+        private static Tuple<List<string>, List<string>> FindPermutation(Tuple<string, string> tuple, List<string> firstTeam, List<string> secondTeam, bool separate)
         {
             for (int i = 0; i <= 1; i++)
             {
-                var enemy1 = teamWithEnemies.Find(t => t == tuple.Item1);
-                var tempList = teamWithEnemies.Where(t => t != tuple.Item1).ToList();
-                foreach (var p in secondTeam)
+                // isolate from others
+                var firstDude = firstTeam.Find(t => t == tuple.Item1);
+                // create 
+                var tempList = firstTeam.Where(t => t != tuple.Item1).ToList();
+                foreach (var p in secondTeam) 
                 {
-                    var tempList2 = teamWithEnemies.Where(t => t != tuple.Item1).ToList(); ;
+                    var tempList2 = firstTeam.Where(t => t != tuple.Item1).ToList(); ;
                     tempList2.Add(p);
-                    if (!AreThereEnemiesInTeam(tempList2))
+                    if (!AreConditionsGoodInTeam(tempList2))
                     {
                         var tempSecond = secondTeam.Where(t => t != p).ToList();
-                        tempSecond.Add(enemy1);
-                        if (!AreThereEnemiesInTeam(tempSecond))
+                        tempSecond.Add(firstDude);
+                        if (!AreConditionsGoodInTeam(tempSecond))
                         {
-                            teamWithEnemies = tempList2;
+                            firstTeam = tempList2;
                             secondTeam = tempSecond;
                             break;
                         }
                     }
                 }
+                //TODO : count should be dynamic and not just 3
                 if (tempList.Count != 3)
                 {
                     tuple = new Tuple<string, string>(tuple.Item2, tuple.Item1);
                     continue;
                 }
-                return new Tuple<List<string>, List<string>>(teamWithEnemies, secondTeam);
+                return new Tuple<List<string>, List<string>>(firstTeam, secondTeam);
             }
-            return new Tuple<List<string>, List<string>>(teamWithEnemies, secondTeam);
+            return new Tuple<List<string>, List<string>>(firstTeam, secondTeam);
         }
 
-        public static bool AreThereEnemiesInTeam(List<string> team)
+        public static bool AreConditionsGoodInTeam(List<string> team)
         {
-            return _enemyList.Any(t => team.Contains(t.Item1) && team.Contains(t.Item2));
+            return _conditionList.Any(t => team.Contains(t.Item1) && team.Contains(t.Item2));
         }
     }
 }
