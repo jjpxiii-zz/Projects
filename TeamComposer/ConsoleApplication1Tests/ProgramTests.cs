@@ -11,34 +11,6 @@ namespace ConsoleApplication1.Tests
     [TestClass()]
     public class SwissFormatInfoTests
     {
-        [TestMethod()]
-        public void FormatTest()
-        {
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:SwissDefault}", 133.00), "133.-");
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:SwissDefault}", 133.66), "133.66");
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:SwissDefault}", 133.6959), "133.70");
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:SwissWithCurrency}", 133.00), "CHF 133.-");
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:SwissWithCurrency}", 133.66), "CHF 133.66");
-            Assert.AreEqual(string.Format(new PriceFormatter(), "{0:Default}", 133.00), "133,00");
-        }
-
-        [TestMethod]
-        public void PriceFormatTest()
-        {
-            Assert.AreEqual("199.<sup>00</sup>", Programc.PriceFormat("199.00", "<sup>", "</sup>", "", "", "", "CHF", ".", false, "CH", true, false));
-            Assert.AreEqual("199<sup>&euro;00</sup>", Programc.PriceFormat("199,00&euro;", "<sup>", "</sup>", "", "", "&euro;", "€", ",", false, "FR", false));
-            Assert.AreEqual("199,00&euro;<em class=\"tax\">HT</em>", Programc.PriceFormat("199,00&euro;HT", "", "", "<em class=\"tax\">", "</em>", "&euro;", "€", ",", true, "FR", false));
-            Assert.AreEqual("199<sup>&euro;00</sup><em class=\"tax\">HT</em>", Programc.PriceFormat("199,00&euro;HT", "<sup>", "</sup>", "<em class=\"tax\">", "</em>", "&euro;", "€", ",", true, "FR", false));
-        }
-
-        [TestMethod]
-        public void DisplayCostTest()
-        {
-
-            Assert.AreEqual("199.-", Programc.DisplayCost(199.00m));
-            Assert.AreEqual("199.55", Programc.DisplayCost(199.55m));
-        }
-
         [TestMethod]
         public void TestTB()
         {
