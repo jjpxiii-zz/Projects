@@ -1,0 +1,11 @@
+[alias]
+	lg = log --all --decorate --oneline --graph
+	cm = checkout master
+	cd = checkout develop
+	ph = push origin master
+	pl = pull origin master
+	phd = push origin develop
+	pld = pull origin develop
+    last = log -1 HEAD
+	alias = config --get-regexp ^alias\\.
+	s = status
